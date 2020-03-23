@@ -6,15 +6,20 @@ import (
 	"net/http"
 )
 
-func Handler(w http.ResponseWriter, r *http.Request) {
-	apiKey := r.Header.Get("Api-Key")
+type Proxy struct {
+	ApiKey string
+}
 
-	if len(apiKey) > 0 {
-		log.Printf("api key: '%s'", apiKey)
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "api key: '%s'", apiKey)
-	} else {
-		log.Print("missing api key")
+func (p Proxy) Handler(w http.ResponseWriter, r *http.Request) {
+	request_key := r.Header.Get("Api-Key")
+
+	if len(request_key) == 0 {
 		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	} else if request_key != p.ApiKey {
+		http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
+	} else {
+		log.Printf("api key: '%s'", request_key)
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "api key: '%s'", request_key)
 	}
 }
