@@ -1,50 +1,72 @@
 package chproxy
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
 	"net/http"
-	"net/http/httptest"
 
 	"github.com/cberez/chproxy/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestHandler(t *testing.T) {
-	t.Run("200 on correct api key", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		request.Header.Set("Api-Key", "correct api key")
-		response := httptest.NewRecorder()
 
-		p := chproxy.Proxy{ApiKey: "correct api key"}
-		p.Handler(response, request)
+	timeout := 2
+	addr := "localhost:8081"
+	apiKey := "correct api key"
+	// tests expect a chrome headless to be running on port 9222
+	addresses := []string{"localhost:9222"}
 
-		sc := response.Result().StatusCode
+	go func() {
+		p := chproxy.Proxy{ApiKey: apiKey, Timeout: timeout, Addresses: addresses}
+		p.ServeAndHandle(addr)
+	}()
+
+	t.Run("200 with expected content on correct api key", func(t *testing.T) {
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s", addr), nil)
+		req.Header.Set("Api-Key", apiKey)
+
+		client := http.Client{Timeout: time.Duration(time.Duration(timeout) * time.Second)}
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("error executing request: %v", err)
+		}
+		defer res.Body.Close()
+
+		sc := res.StatusCode
 
 		assert.Equal(t, http.StatusOK, sc)
 	})
 
 	t.Run("401 on incorrect api key", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		request.Header.Set("Api-Key", "wrong api key")
-		response := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s", addr), nil)
+		req.Header.Set("Api-Key", "wrong api key")
 
-		p := chproxy.Proxy{ApiKey: "correct api key"}
-		p.Handler(response, request)
+		client := http.Client{Timeout: time.Duration(time.Duration(timeout) * time.Second)}
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("error executing request: %v", err)
+		}
+		defer res.Body.Close()
 
-		sc := response.Result().StatusCode
+		sc := res.StatusCode
 
 		assert.Equal(t, http.StatusUnauthorized, sc)
 	})
 
 	t.Run("401 on missing api key", func(t *testing.T) {
-		request, _ := http.NewRequest(http.MethodGet, "/", nil)
-		response := httptest.NewRecorder()
+		req, _ := http.NewRequest(http.MethodGet, fmt.Sprintf("http://%s", addr), nil)
 
-		p := chproxy.Proxy{ApiKey: "correct api key"}
-		p.Handler(response, request)
+		client := http.Client{Timeout: time.Duration(time.Duration(timeout) * time.Second)}
+		res, err := client.Do(req)
+		if err != nil {
+			fmt.Printf("error executing request: %v", err)
+		}
+		defer res.Body.Close()
 
-		sc := response.Result().StatusCode
+		sc := res.StatusCode
 
 		assert.Equal(t, http.StatusUnauthorized, sc)
 	})

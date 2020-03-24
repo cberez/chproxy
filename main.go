@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/cberez/chproxy/proxy"
-	"log"
-	"net/http"
+	"strings"
 )
 
 func main() {
-	http.HandleFunc("/", chproxy.Handler)
-	log.Print("listening on port 8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	addresses := "localhost:9222"
+	port := "8080"
+
+	p := chproxy.Proxy{ApiKey: "key", Timeout: 5, Addresses: strings.Split(addresses, ",")}
+	p.ServeAndHandle(fmt.Sprintf("localhost:%s", port))
 }
