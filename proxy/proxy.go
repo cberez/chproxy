@@ -14,6 +14,10 @@ import (
 	"net/http"
 )
 
+// Proxy server definition
+// - ApiKey: the api key to use for request validation
+// - Timeout: the connections timeout in seconds
+// - Addresses: list of chrome headless addresses formatted as "host:port"
 type Proxy struct {
 	ApiKey    string
 	Timeout   int
@@ -81,6 +85,7 @@ func (p Proxy) checkHeaders(conn net.Conn) (*bytes.Buffer, int, string) {
 		log.Printf("error parsing request: %v", err)
 		return nil, http.StatusBadRequest, "cannot parse incoming HTTP request"
 	}
+
 	request_key := req.Header.Get("Api-Key")
 
 	if len(request_key) == 0 {
