@@ -5,15 +5,25 @@
 
 Simple Go proxy to secure access to one or more chrome headless instancess. If multiple chrome headless instances are specified, it will randomly choose one.
 
-## Test
+## Build
 
-```
-make test
+```bash
+go build
 ```
 
 ## Run
 
-```
+```bash
 make start
+# or
+go run -addresses=host:port,... -port=8080 -timeout=5 -apikey="some api key"
+```
+
+## Test
+
+```bash
+make test # expects a chrome headless running on localhost:9222
+# or
+make local_test # expects chromium installed
 ```
 
