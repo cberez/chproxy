@@ -113,7 +113,7 @@ func (p Proxy) forwardConn(conn net.Conn) {
 	io.Copy(conn, upstream)
 }
 
-// Wrap given code and message in a http response and write it to a bytes buffer.
+// Wrap given code and message in a http.Response and write it to a bytes.Buffer.
 func (p Proxy) createErrorResponse(code int, message string) *bytes.Buffer {
 	r := &http.Response{
 		Status:        fmt.Sprintf("%d %s", code, http.StatusText(code)),
