@@ -19,6 +19,8 @@ make start
 go run -addresses=host:port,... -port=8080 -timeout=5 -apikey="some api key"
 ```
 
+`-addresses` expects chrome headless addresses.
+
 ## Test
 
 ```bash
