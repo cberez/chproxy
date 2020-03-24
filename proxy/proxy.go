@@ -34,13 +34,13 @@ func (c connWithReader) Read(p []byte) (int, error) {
 func (p Proxy) ServeAndHandle(address string) {
 	l, err := net.Listen("tcp", address)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error listening on address: %v", err)
 	}
 
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("error accepting connection: %v", err)
 		}
 		go p.ProcessRequest(conn)
 	}
